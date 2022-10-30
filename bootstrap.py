@@ -23,6 +23,12 @@ import shutil
 import sys
 import tempfile
 
+import collections
+if sys.version_info.major == 3 and sys.version_info.minor >= 10:
+    from collections.abc import MutableMapping
+else:
+    from collections import MutableMapping
+
 from optparse import OptionParser
 
 tmpeggs = tempfile.mkdtemp()
@@ -74,8 +80,8 @@ try:
 except ImportError:
     from urllib2 import urlopen
 
-ez = {}
-exec(urlopen('https://bootstrap.pypa.io/ez_setup.py').read(), ez)
+# ez = {}
+# exec(urlopen('https://bootstrap.pypa.io/ez_setup.py').read(), ez)
 
 if not options.allow_site_packages:
     # ez_setup imports site, which adds site packages
@@ -89,12 +95,11 @@ if not options.allow_site_packages:
             sys.path[:] = [x for x in sys.path if sitepackage_path not in x]
 
 setup_args = dict(to_dir=tmpeggs, download_delay=0)
-ez['use_setuptools'](**setup_args)
+# ez['use_setuptools'](**setup_args)
 import setuptools
 import pkg_resources
 
-# This does not (always?) update the default working set.  We will
-# do it.
+# This does not (always?) update the default working set.  We will do it.
 for path in sys.path:
     if path not in pkg_resources.working_set.entries:
         pkg_resources.working_set.add_entry(path)
@@ -128,10 +133,15 @@ if version is None and not options.accept_buildout_test_releases:
     _final_parts = '*final-', '*final'
 
     def _final_version(parsed_version):
-        for part in parsed_version:
-            if (part[:1] == '*') and (part not in _final_parts):
-                return False
         return True
+        #   File "~/source/github-watchlist/bootstrap.py", line 131, in _final_version
+        #     for part in parsed_version:
+        # TypeError: 'Version' object is not iterable
+        #
+        # for part in parsed_version:
+        #     if (part[:1] == '*') and (part not in _final_parts):
+        #         return False
+        # return True
     index = setuptools.package_index.PackageIndex(
         search_path=[setuptools_path])
     if find_links:
